@@ -1,39 +1,31 @@
-var utils = require('./_utils')
-var expect = require('chai').expect
-var http = require('http')
+import { createServer, proxyMiddleware } from './_utils';
+import * as http from 'http';
 
 describe('E2E router', function() {
-  var proxyServer, targetServerA, targetServerB, targetServerC
-  var createServer
-  var proxyMiddleware
-
-  beforeEach(function() {
-    createServer = utils.createServer
-    proxyMiddleware = utils.proxyMiddleware
-  })
+  var proxyServer, targetServerA, targetServerB, targetServerC;
 
   beforeEach(function() {
     targetServerA = createServer(6001, function(req, res, next) {
-      res.write('A')
-      res.end()
-    })
+      res.write('A');
+      res.end();
+    });
 
     targetServerB = createServer(6002, function(req, res, next) {
-      res.write('B')
-      res.end()
-    })
+      res.write('B');
+      res.end();
+    });
 
     targetServerC = createServer(6003, function(req, res, next) {
-      res.write('C')
-      res.end()
-    })
-  })
+      res.write('C');
+      res.end();
+    });
+  });
 
   afterEach(function() {
-    targetServerA.close()
-    targetServerB.close()
-    targetServerC.close()
-  })
+    targetServerA.close();
+    targetServerB.close();
+    targetServerC.close();
+  });
 
   describe('router with proxyTable', function() {
     beforeEach(function() {
@@ -42,27 +34,27 @@ describe('E2E router', function() {
         proxyMiddleware({
           target: 'http://localhost:6001',
           router: function(req) {
-            return 'http://localhost:6003'
+            return 'http://localhost:6003';
           }
         })
-      )
-    })
+      );
+    });
 
     afterEach(function() {
-      proxyServer.close()
-    })
+      proxyServer.close();
+    });
 
     it('should proxy to: "localhost:6003/api"', function(done) {
-      var options = { hostname: 'localhost', port: 6000, path: '/api' }
+      var options = { hostname: 'localhost', port: 6000, path: '/api' };
       http.get(options, function(res) {
         res.on('data', function(chunk) {
-          var responseBody = chunk.toString()
-          expect(responseBody).to.equal('C')
-          done()
-        })
-      })
-    })
-  })
+          var responseBody = chunk.toString();
+          expect(responseBody).toBe('C');
+          done();
+        });
+      });
+    });
+  });
 
   describe('router with proxyTable', function() {
     beforeEach(function setupServers() {
@@ -76,56 +68,56 @@ describe('E2E router', function() {
             'localhost:6000/api': 'http://localhost:6003'
           }
         })
-      )
-    })
+      );
+    });
 
     afterEach(function() {
-      proxyServer.close()
-    })
+      proxyServer.close();
+    });
 
     it('should proxy to option.target', function(done) {
       http.get('http://localhost:6000', function(res) {
         res.on('data', function(chunk) {
-          var responseBody = chunk.toString()
-          expect(responseBody).to.equal('A')
-          done()
-        })
-      })
-    })
+          var responseBody = chunk.toString();
+          expect(responseBody).toBe('A');
+          done();
+        });
+      });
+    });
 
     it('should proxy when host is "alpha.localhost"', function(done) {
-      var options = { hostname: 'localhost', port: 6000, path: '/' }
-      options.headers = { host: 'alpha.localhost:6000' }
+      var options = { hostname: 'localhost', port: 6000, path: '/' } as any;
+      options.headers = { host: 'alpha.localhost:6000' };
       http.get(options, function(res) {
         res.on('data', function(chunk) {
-          var responseBody = chunk.toString()
-          expect(responseBody).to.equal('A')
-          done()
-        })
-      })
-    })
+          var responseBody = chunk.toString();
+          expect(responseBody).toBe('A');
+          done();
+        });
+      });
+    });
 
     it('should proxy when host is "beta.localhost"', function(done) {
-      var options = { hostname: 'localhost', port: 6000, path: '/' }
-      options.headers = { host: 'beta.localhost:6000' }
+      var options = { hostname: 'localhost', port: 6000, path: '/' } as any;
+      options.headers = { host: 'beta.localhost:6000' };
       http.get(options, function(res) {
         res.on('data', function(chunk) {
-          var responseBody = chunk.toString()
-          expect(responseBody).to.equal('B')
-          done()
-        })
-      })
-    })
+          var responseBody = chunk.toString();
+          expect(responseBody).toBe('B');
+          done();
+        });
+      });
+    });
 
     it('should proxy with host & path config: "localhost:6000/api"', function(done) {
-      var options = { hostname: 'localhost', port: 6000, path: '/api' }
+      var options = { hostname: 'localhost', port: 6000, path: '/api' };
       http.get(options, function(res) {
         res.on('data', function(chunk) {
-          var responseBody = chunk.toString()
-          expect(responseBody).to.equal('C')
-          done()
-        })
-      })
-    })
-  })
-})
+          var responseBody = chunk.toString();
+          expect(responseBody).toBe('C');
+          done();
+        });
+      });
+    });
+  });
+});

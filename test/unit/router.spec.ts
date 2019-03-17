@@ -1,8 +1,7 @@
-var expect = require('chai').expect
-var router = require('./_libs').router
+import { getTarget } from '../../lib/router';
 
 describe('router unit test', function() {
-  var req, config, result, proxyOptionWithRouter
+  var req, config, result, proxyOptionWithRouter;
 
   beforeEach(function() {
     req = {
@@ -10,38 +9,38 @@ describe('router unit test', function() {
         host: 'localhost'
       },
       url: '/'
-    }
+    };
 
     config = {
       target: 'http://localhost:6000'
-    }
-  })
+    };
+  });
 
   describe('router.getTarget from function', function() {
-    var request
+    var request;
 
     beforeEach(function() {
       proxyOptionWithRouter = {
         target: 'http://localhost:6000',
         router: function(req) {
-          request = req
-          return 'http://foobar.com:666'
+          request = req;
+          return 'http://foobar.com:666';
         }
-      }
+      };
 
-      result = router.getTarget(req, proxyOptionWithRouter)
-    })
+      result = getTarget(req, proxyOptionWithRouter);
+    });
 
     describe('custom dynamic router function', function() {
       it('should provide the request object for dynamic routing', function() {
-        expect(request.headers.host).to.equal('localhost')
-        expect(request.url).to.equal('/')
-      })
+        expect(request.headers.host).toBe('localhost');
+        expect(request.url).toBe('/');
+      });
       it('should return new target', function() {
-        expect(result).to.equal('http://foobar.com:666')
-      })
-    })
-  })
+        expect(result).toBe('http://foobar.com:666');
+      });
+    });
+  });
 
   describe('router.getTarget from table', function() {
     beforeEach(function() {
@@ -56,78 +55,78 @@ describe('router unit test', function() {
           '/some/specific/path': 'http://localhost:6006',
           '/some': 'http://localhost:6007'
         }
-      }
-    })
+      };
+    });
 
     describe('without router config', function() {
       it('should return the normal target when router not present in config', function() {
-        result = router.getTarget(req, config)
-        expect(result).to.equal(undefined)
-      })
-    })
+        result = getTarget(req, config);
+        expect(result).toBeUndefined();
+      });
+    });
 
     describe('with just the host in router config', function() {
       it('should target http://localhost:6001 when for router:"alpha.localhost"', function() {
-        req.headers.host = 'alpha.localhost'
-        result = router.getTarget(req, proxyOptionWithRouter)
-        expect(result).to.equal('http://localhost:6001')
-      })
+        req.headers.host = 'alpha.localhost';
+        result = getTarget(req, proxyOptionWithRouter);
+        expect(result).toBe('http://localhost:6001');
+      });
 
       it('should target http://localhost:6002 when for router:"beta.localhost"', function() {
-        req.headers.host = 'beta.localhost'
-        result = router.getTarget(req, proxyOptionWithRouter)
-        expect(result).to.equal('http://localhost:6002')
-      })
-    })
+        req.headers.host = 'beta.localhost';
+        result = getTarget(req, proxyOptionWithRouter);
+        expect(result).toBe('http://localhost:6002');
+      });
+    });
 
     describe('with host and host + path config', function() {
       it('should target http://localhost:6004 without path', function() {
-        req.headers.host = 'gamma.localhost'
-        result = router.getTarget(req, proxyOptionWithRouter)
-        expect(result).to.equal('http://localhost:6004')
-      })
+        req.headers.host = 'gamma.localhost';
+        result = getTarget(req, proxyOptionWithRouter);
+        expect(result).toBe('http://localhost:6004');
+      });
 
       it('should target http://localhost:6003 exact path match', function() {
-        req.headers.host = 'gamma.localhost'
-        req.url = '/api'
-        result = router.getTarget(req, proxyOptionWithRouter)
-        expect(result).to.equal('http://localhost:6003')
-      })
+        req.headers.host = 'gamma.localhost';
+        req.url = '/api';
+        result = getTarget(req, proxyOptionWithRouter);
+        expect(result).toBe('http://localhost:6003');
+      });
 
       it('should target http://localhost:6004 when contains path', function() {
-        req.headers.host = 'gamma.localhost'
-        req.url = '/api/books/123'
-        result = router.getTarget(req, proxyOptionWithRouter)
-        expect(result).to.equal('http://localhost:6003')
-      })
-    })
+        req.headers.host = 'gamma.localhost';
+        req.url = '/api/books/123';
+        result = getTarget(req, proxyOptionWithRouter);
+        expect(result).toBe('http://localhost:6003');
+      });
+    });
 
     describe('with just the path', function() {
       it('should target http://localhost:6005 with just a path as router config', function() {
-        req.url = '/rest'
-        result = router.getTarget(req, proxyOptionWithRouter)
-        expect(result).to.equal('http://localhost:6005')
-      })
+        req.url = '/rest';
+        result = getTarget(req, proxyOptionWithRouter);
+        expect(result).toBe('http://localhost:6005');
+      });
 
       it('should target http://localhost:6005 with just a path as router config', function() {
-        req.url = '/rest/deep/path'
-        result = router.getTarget(req, proxyOptionWithRouter)
-        expect(result).to.equal('http://localhost:6005')
-      })
+        req.url = '/rest/deep/path';
+        result = getTarget(req, proxyOptionWithRouter);
+        expect(result).toBe('http://localhost:6005');
+      });
 
       it('should target http://localhost:6000 path in not present in router config', function() {
-        req.url = '/unknow-path'
-        result = router.getTarget(req, proxyOptionWithRouter)
-        expect(result).to.equal(undefined)
-      })
-    })
+        req.url = '/unknow-path';
+        result = getTarget(req, proxyOptionWithRouter);
+        expect(result).toBeUndefined();
+      });
+    });
 
     describe('matching order of router config', function() {
       it('should return first matching target when similar paths are configured', function() {
-        req.url = '/some/specific/path'
-        result = router.getTarget(req, proxyOptionWithRouter)
-        expect(result).to.equal('http://localhost:6006')
-      })
-    })
-  })
-})
+        req.url = '/some/specific/path';
+        result = getTarget(req, proxyOptionWithRouter);
+        expect(result).toBe('http://localhost:6006');
+      });
+    });
+  });
+});
